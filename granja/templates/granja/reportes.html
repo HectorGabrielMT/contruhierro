@@ -1,0 +1,78 @@
+{% extends "granja/base.html" %}
+{% block title %}Reportes | Contru hierro{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+    <div><h1 class="page-title">Reportes</h1><p class="page-sub">Inventario, procedencia de los animales y movimiento de ventas.</p></div>
+    <button type="button" onclick="window.print()" class="btn btn-outline print:hidden">{% include "granja/_icono.html" with n="printer" c="h-4 w-4" %} Imprimir reporte</button>
+</div>
+
+<section class="card mb-6 overflow-hidden">
+    <div class="card-head"><div><h2 class="card-title">Período del reporte</h2><p class="card-sub">Las fechas filtran los cochinos ingresados y las ventas. El inventario muestra todos los animales actuales.</p></div></div>
+    <form method="get" class="grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto_auto] print:hidden">
+        <div><label for="desde" class="label">Desde</label><input id="desde" name="desde" type="date" value="{{ desde }}" required class="input"></div>
+        <div><label for="hasta" class="label">Hasta</label><input id="hasta" name="hasta" type="date" value="{{ hasta }}" required class="input"></div>
+        <div class="flex items-end"><button type="submit" class="btn btn-primary w-full">Consultar</button></div>
+        <div class="flex items-end"><a href="{% url 'reportes' %}" class="btn btn-outline w-full">Este mes</a></div>
+    </form>
+    <p class="px-6 pb-5 text-xs text-slate-400">Período consultado: <span class="font-semibold text-slate-600">{{ desde_fecha|date:"d/m/Y" }}</span> al <span class="font-semibold text-slate-600">{{ hasta_fecha|date:"d/m/Y" }}</span></p>
+</section>
+
+<section class="mb-6" aria-labelledby="inventario-title">
+    <h2 id="inventario-title" class="mb-3 text-sm font-semibold text-slate-800">Inventario actual</h2>
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Total de cochinos</p><p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">{{ total_cochinos }}</p><p class="mt-1 text-xs text-slate-400">Todos los animales registrados</p></article>
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Disponibles</p><p class="mt-2 text-3xl font-semibold tracking-tight text-emerald-600">{{ cochinos_disponibles }}</p><p class="mt-1 text-xs text-slate-400">Todavía se pueden vender</p></article>
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Vendidos</p><p class="mt-2 text-3xl font-semibold tracking-tight text-brand-600">{{ cochinos_vendidos }}</p><p class="mt-1 text-xs text-slate-400">Ya forman parte de una venta</p></article>
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Comprados</p><p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">{{ total_comprados }}</p><p class="mt-1 text-xs text-slate-400">Ingresados mediante compra</p></article>
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Criados en la granja</p><p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">{{ total_criados }}</p><p class="mt-1 text-xs text-slate-400">Nacidos o criados aquí</p></article>
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Origen sin especificar</p><p class="mt-2 text-3xl font-semibold tracking-tight text-amber-600">{{ total_sin_origen }}</p><p class="mt-1 text-xs text-slate-400">Conviene revisar estos registros</p></article>
+    </div>
+    <div class="mt-4 grid gap-4 sm:grid-cols-3">
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Machos</p><p class="mt-2 text-2xl font-semibold text-brand-600">{{ total_machos }}</p></article>
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Hembras</p><p class="mt-2 text-2xl font-semibold text-pink-500">{{ total_hembras }}</p></article>
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Peso total registrado</p><p class="mt-2 text-2xl font-semibold text-slate-900">{{ total_peso|floatformat:2 }} kg</p></article>
+    </div>
+</section>
+
+<section class="mb-6" aria-labelledby="periodo-title">
+    <h2 id="periodo-title" class="mb-3 text-sm font-semibold text-slate-800">Movimientos del período</h2>
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Cochinos ingresados</p><p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">{{ ingresados_periodo }}</p><p class="mt-1 text-xs text-slate-400">Registros nuevos en estas fechas</p></article>
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Comprados</p><p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">{{ comprados_periodo }}</p><p class="mt-1 text-xs text-slate-400">Ingresados mediante compra</p></article>
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Criados aquí</p><p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">{{ criados_periodo }}</p><p class="mt-1 text-xs text-slate-400">Marcados como criados</p></article>
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Inversión en compras</p><p class="mt-2 break-words text-3xl font-semibold tracking-tight text-slate-900">{{ inversion_periodo|floatformat:2 }}</p><p class="mt-1 text-xs text-slate-400">Costo de los comprados</p></article>
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Ventas realizadas</p><p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900">{{ ventas_periodo }}</p><p class="mt-1 text-xs text-slate-400">Operaciones en estas fechas</p></article>
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Ingresos por ventas</p><p class="mt-2 break-words text-3xl font-semibold tracking-tight text-slate-900">{{ ingresos_periodo|floatformat:2 }}</p><p class="mt-1 text-xs text-slate-400">Importe total de las ventas</p></article>
+        <article class="card p-5"><p class="text-xs font-medium text-slate-400">Monto cobrado</p><p class="mt-2 break-words text-3xl font-semibold tracking-tight text-emerald-600">{{ cobrado_periodo|floatformat:2 }}</p><p class="mt-1 text-xs text-slate-400">Pagos registrados en las ventas</p></article>
+    </div>
+    {% if sin_origen_periodo %}<p class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">Hay {{ sin_origen_periodo }} cochinos ingresados durante este período cuyo origen no está especificado. Edita su registro si conoces esa información.</p>{% endif %}
+</section>
+
+<section class="mb-6 grid gap-6 xl:grid-cols-2">
+    <div class="card overflow-hidden">
+        <div class="card-head"><div><h2 class="card-title">Reporte por sexo</h2><p class="card-sub">Cantidad, estado y procedencia</p></div></div>
+        <div class="overflow-x-auto"><table class="w-full min-w-[600px] text-left"><thead><tr class="border-b border-slate-100"><th class="th">Sexo</th><th class="th text-right">Total</th><th class="th text-right">Disponibles</th><th class="th text-right">Vendidos</th><th class="th text-right">Comprados</th><th class="th text-right">Criados</th><th class="th text-right">Sin origen</th></tr></thead><tbody class="divide-y divide-slate-50">{% for fila in resumen_sexo %}<tr><td class="td font-semibold text-slate-900">{{ fila.sexo }}</td><td class="td text-right font-semibold text-slate-900">{{ fila.total }}</td><td class="td text-right text-emerald-600">{{ fila.disponibles }}</td><td class="td text-right text-brand-600">{{ fila.vendidos }}</td><td class="td text-right">{{ fila.comprados }}</td><td class="td text-right">{{ fila.criados }}</td><td class="td text-right">{{ fila.sin_origen }}</td></tr>{% endfor %}</tbody></table></div>
+    </div>
+    <div class="card overflow-hidden">
+        <div class="card-head"><div><h2 class="card-title">Reporte por raza</h2><p class="card-sub">Compara las razas registradas</p></div></div>
+        <div class="overflow-x-auto"><table class="w-full min-w-[460px] text-left"><thead><tr class="border-b border-slate-100"><th class="th">Raza</th><th class="th text-right">Total</th><th class="th text-right">Disponibles</th><th class="th text-right">Vendidos</th><th class="th text-right">Comprados</th><th class="th text-right">Sin origen</th></tr></thead><tbody class="divide-y divide-slate-50">{% for fila in resumen_razas %}<tr><td class="td font-semibold text-slate-900">{{ fila.raza }}</td><td class="td text-right font-semibold text-slate-900">{{ fila.total }}</td><td class="td text-right text-emerald-600">{{ fila.disponibles }}</td><td class="td text-right text-brand-600">{{ fila.vendidos }}</td><td class="td text-right">{{ fila.comprados }}</td><td class="td text-right">{{ fila.sin_origen }}</td></tr>{% endfor %}</tbody></table></div>
+    </div>
+</section>
+
+<section class="mb-6 grid gap-6 xl:grid-cols-2">
+    <div class="card overflow-hidden">
+        <div class="card-head"><div><h2 class="card-title">Clientes con ventas</h2><p class="card-sub">Los 10 con mayor importe en el período</p></div></div>
+        <div class="overflow-x-auto"><table class="w-full min-w-[420px] text-left"><thead><tr class="border-b border-slate-100"><th class="th">Cliente</th><th class="th text-right">N.º ventas</th><th class="th text-right">Importe</th></tr></thead><tbody class="divide-y divide-slate-50">{% for fila in ventas_por_cliente %}<tr><td class="td font-medium text-slate-800">{{ fila.cliente__nombre }}</td><td class="td text-right">{{ fila.cantidad }}</td><td class="td text-right font-semibold text-slate-900">{{ fila.importe|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="3" class="px-5 py-8 text-center text-slate-400">No hay ventas en este período.</td></tr>{% endfor %}</tbody></table></div>
+    </div>
+    <div class="card overflow-hidden">
+        <div class="card-head"><div><h2 class="card-title">Últimos cochinos ingresados</h2><p class="card-sub">Registros nuevos dentro de las fechas seleccionadas</p></div></div>
+        <div class="overflow-x-auto"><table class="w-full min-w-[420px] text-left"><thead><tr class="border-b border-slate-100"><th class="th">Código</th><th class="th">Nombre</th><th class="th">Origen</th><th class="th">Fecha</th></tr></thead><tbody class="divide-y divide-slate-50">{% for cochino in cochinos_recientes %}<tr><td class="td font-semibold text-slate-900">{{ cochino.codigo }}</td><td class="td">{{ cochino.nombre|default:"Sin nombre" }}</td><td class="td">{{ cochino.get_origen_display }}</td><td class="td whitespace-nowrap">{{ cochino.creado_en|date:"d/m/Y" }}</td></tr>{% empty %}<tr><td colspan="4" class="px-5 py-8 text-center text-slate-400">No hay nuevos registros en este período.</td></tr>{% endfor %}</tbody></table></div>
+    </div>
+</section>
+
+<section class="card overflow-hidden">
+    <div class="card-head"><div><h2 class="card-title">Últimas ventas del período</h2><p class="card-sub">Hasta 10 ventas, de la más reciente a la más antigua</p></div><a href="{% url 'ventas_lista' %}" class="btn btn-outline print:hidden">Ver todas las ventas</a></div>
+    <div class="overflow-x-auto"><table class="w-full min-w-[640px] text-left"><thead><tr class="border-b border-slate-100"><th class="th">N.º de venta</th><th class="th">Fecha</th><th class="th">Cliente</th><th class="th text-right">Cochinos</th><th class="th text-right">Total</th><th class="th text-center print:hidden">Detalle</th></tr></thead><tbody class="divide-y divide-slate-50">{% for venta in ventas_recientes %}<tr><td class="td whitespace-nowrap font-semibold text-brand-600">CH-{{ venta.pk|stringformat:"06d" }}</td><td class="td whitespace-nowrap">{{ venta.fecha|date:"d/m/Y" }}</td><td class="td">{{ venta.cliente.nombre }}</td><td class="td text-right">{{ venta.detalles.all|length }}</td><td class="td whitespace-nowrap text-right font-semibold text-slate-900">{{ venta.total|floatformat:2 }}</td><td class="td text-center print:hidden"><a href="{% url 'venta_detalle' venta.pk %}" class="link">Ver</a></td></tr>{% empty %}<tr><td colspan="6" class="px-5 py-8 text-center text-slate-400">No hay ventas registradas dentro de este período.</td></tr>{% endfor %}</tbody></table></div>
+</section>
+<p class="mt-6 text-xs text-slate-400 print:hidden">La fecha de ingreso corresponde al momento en que se registró el cochino en el sistema. Los animales antiguos con origen desconocido aparecen como «Sin especificar» hasta que actualices su ficha.</p>
+{% endblock %}

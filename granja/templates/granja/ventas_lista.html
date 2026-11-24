@@ -1,0 +1,16 @@
+{% extends "granja/base.html" %}
+{% block title %}Ventas | Contru hierro{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+    <div><h1 class="page-title">Ventas</h1><p class="page-sub">Operaciones registradas, importes y estado de pago.</p></div>
+    <a href="{% url 'venta_crear' %}" class="btn btn-primary">{% include "granja/_icono.html" with n="plus" c="h-4 w-4" %} Nueva venta</a>
+</div>
+<section class="card overflow-hidden">
+    <form method="get" class="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:p-5"><input name="q" value="{{ q }}" placeholder="Buscar por cliente, n.º de venta o referencia de pago" aria-label="Buscar ventas" class="input min-w-0 flex-1"><button class="btn btn-primary">Buscar</button><a href="{% url 'ventas_lista' %}" class="btn btn-outline">Limpiar</a></form>
+    <div class="overflow-x-auto"><table class="w-full min-w-[900px] text-left"><thead><tr class="border-b border-slate-100"><th class="th">N.º de venta</th><th class="th">Cliente</th><th class="th">Fecha</th><th class="th">Cochinos</th><th class="th">Pago</th><th class="th text-right">Total</th><th class="th text-right">Detalle</th></tr></thead><tbody class="divide-y divide-slate-50">
+    {% for venta in ventas %}<tr class="hover:bg-slate-50/70"><td class="td whitespace-nowrap"><a href="{% url 'venta_detalle' venta.pk %}" class="link">CH-{{ venta.pk|stringformat:"06d" }}</a></td><td class="td font-medium text-slate-800">{{ venta.cliente.nombre }}</td><td class="td whitespace-nowrap">{{ venta.fecha|date:"d/m/Y H:i" }}</td><td class="td">{{ venta.detalles.all|length }}</td><td class="td"><span class="badge {% if venta.estado_pago == 'PAGADO' %}badge-green{% elif venta.estado_pago == 'PARCIAL' %}badge-amber{% else %}badge-gray{% endif %}">{{ venta.estado_pago_texto }}</span><p class="mt-1 text-xs text-slate-400">{{ venta.get_metodo_pago_display }}{% if venta.referencia_pago %} · Ref. {{ venta.referencia_pago }}{% endif %}</p></td><td class="td whitespace-nowrap text-right font-semibold text-slate-900">{{ venta.total|floatformat:2 }}</td><td class="td text-right"><a href="{% url 'venta_detalle' venta.pk %}" class="btn btn-outline px-3 py-2">{% include "granja/_icono.html" with n="eye" c="h-4 w-4" %} Ver</a></td></tr>
+    {% empty %}<tr><td colspan="7" class="px-5 py-16 text-center"><p class="font-semibold text-slate-700">No hay ventas registradas</p><p class="mt-1 text-sm text-slate-400">Las ventas que realices se mostrarán en esta tabla.</p><a href="{% url 'venta_crear' %}" class="btn btn-primary mt-5">Registrar primera venta</a></td></tr>{% endfor %}
+    </tbody></table></div>
+    <div class="border-t border-slate-100 px-5 py-3 text-xs text-slate-400">Ventas encontradas: <span class="font-semibold text-slate-600">{{ ventas|length }}</span></div>
+</section>
+{% endblock %}

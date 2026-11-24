@@ -1,0 +1,16 @@
+{% extends "granja/base.html" %}
+{% block title %}Clientes | Contru hierro{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+    <div><h1 class="page-title">Clientes</h1><p class="page-sub">Directorio de compradores y datos de contacto.</p></div>
+    <a href="{% url 'cliente_crear' %}" class="btn btn-primary">{% include "granja/_icono.html" with n="plus" c="h-4 w-4" %} Nuevo cliente</a>
+</div>
+<section class="card overflow-hidden">
+    <form method="get" class="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:p-5"><input name="q" value="{{ q }}" placeholder="Buscar por nombre, documento o teléfono" aria-label="Buscar clientes" class="input min-w-0 flex-1"><button class="btn btn-primary">Buscar</button><a href="{% url 'clientes_lista' %}" class="btn btn-outline">Limpiar</a></form>
+    <div class="overflow-x-auto"><table class="w-full min-w-[760px] text-left"><thead><tr class="border-b border-slate-100"><th class="th">Cliente</th><th class="th">Documento</th><th class="th">Contacto</th><th class="th">Ventas</th><th class="th text-right">Acciones</th></tr></thead><tbody class="divide-y divide-slate-50">
+    {% for cliente in clientes %}<tr class="hover:bg-slate-50/70"><td class="td"><div class="flex items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700">{{ cliente.nombre|slice:":1"|upper }}</span><div class="min-w-0"><p class="font-semibold text-slate-900">{{ cliente.nombre }}</p><p class="max-w-sm truncate text-xs text-slate-400">{{ cliente.direccion|default:"Sin dirección registrada" }}</p></div></div></td><td class="td">{{ cliente.documento|default:"—" }}</td><td class="td"><p>{{ cliente.telefono|default:"Sin teléfono" }}</p><p class="text-xs text-slate-400">{{ cliente.correo|default:"Sin correo" }}</p></td><td class="td"><span class="badge badge-gray">{{ cliente.ventas.count }}</span></td><td class="td"><div class="flex items-center justify-end gap-2"><a href="{% url 'cliente_editar' cliente.pk %}" class="btn btn-outline px-3 py-2" title="Editar">{% include "granja/_icono.html" with n="edit" c="h-4 w-4" %}<span class="sr-only">Editar</span></a><form method="post" action="{% url 'cliente_eliminar' cliente.pk %}" onsubmit="return confirm('¿Eliminar el cliente {{ cliente.nombre }}?');">{% csrf_token %}<button class="btn btn-danger px-3 py-2" title="Eliminar">{% include "granja/_icono.html" with n="trash" c="h-4 w-4" %}<span class="sr-only">Eliminar</span></button></form></div></td></tr>
+    {% empty %}<tr><td colspan="5" class="px-5 py-16 text-center"><p class="font-semibold text-slate-700">No hay clientes registrados</p><p class="mt-1 text-sm text-slate-400">Agrega un cliente para poder registrar ventas.</p><a href="{% url 'cliente_crear' %}" class="btn btn-primary mt-5">Crear primer cliente</a></td></tr>{% endfor %}
+    </tbody></table></div>
+    <div class="border-t border-slate-100 px-5 py-3 text-xs text-slate-400">Clientes encontrados: <span class="font-semibold text-slate-600">{{ clientes|length }}</span></div>
+</section>
+{% endblock %}

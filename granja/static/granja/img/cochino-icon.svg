@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Icono de cochino rosado</title>
+  <rect width="128" height="128" rx="28" fill="#fff1f2"/>
+  <path d="M28 39 18 20q-2-7 6-6l27 13M100 39l10-19q2-7-6-6L77 27" fill="#fda4af" stroke="#9f1239" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M25 47c0-19 17-31 39-31s39 12 39 31v22c0 24-17 42-39 42S25 93 25 69Z" fill="#f9a8d4" stroke="#9f1239" stroke-width="4"/>
+  <ellipse cx="47" cy="57" rx="5" ry="7" fill="#1f2937"/>
+  <ellipse cx="81" cy="57" rx="5" ry="7" fill="#1f2937"/>
+  <ellipse cx="64" cy="77" rx="28" ry="20" fill="#fb7185" stroke="#9f1239" stroke-width="3"/>
+  <ellipse cx="54" cy="77" rx="4" ry="6" fill="#881337"/>
+  <ellipse cx="74" cy="77" rx="4" ry="6" fill="#881337"/>
+  <path d="M55 91q9 7 18 0" fill="none" stroke="#9f1239" stroke-width="3" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,64 @@
+{% extends "granja/base.html" %}
+{% block title %}Nueva venta | Contru hierro{% endblock %}
+{% block content %}
+<div class="mb-6"><a href="{% url 'ventas_lista' %}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-brand-600">{% include "granja/_icono.html" with n="arrow-left" c="h-3.5 w-3.5" %} Volver a ventas</a><h1 class="page-title mt-3">Registrar venta</h1><p class="page-sub">Elige el cliente, los cochinos disponibles, el precio de cada uno y los datos del pago.</p></div>
+{% if errores %}<div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 p-4"><p class="text-sm font-semibold text-rose-700">No se pudo registrar la venta:</p><ul class="mt-2 list-inside list-disc space-y-1 text-sm text-rose-600">{% for error in errores %}<li>{{ error }}</li>{% endfor %}</ul></div>{% endif %}
+{% if not clientes %}<div class="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">Todavía no hay clientes registrados. <a href="{% url 'cliente_crear' %}" class="font-semibold underline">Registra un cliente</a> antes de crear la venta.</div>{% endif %}
+<form method="post" class="space-y-6" id="form-venta">{% csrf_token %}
+<section class="card overflow-hidden"><div class="card-head"><div><h2 class="card-title">1. Datos de la operación</h2><p class="card-sub">La venta queda asociada al usuario que inició sesión</p></div></div><div class="grid gap-5 p-6 sm:grid-cols-2"><div><label for="cliente" class="label">Cliente <span class="text-rose-500">*</span></label><select id="cliente" name="cliente" required class="input"><option value="">Selecciona un cliente...</option>{% for cliente in clientes %}<option value="{{ cliente.pk }}" {% if cliente.esta_seleccionado %}selected{% endif %}>{{ cliente.nombre }}</option>{% endfor %}</select></div><div><label for="notas" class="label">Notas de la venta</label><input id="notas" name="notas" value="{{ valores.notas|default:'' }}" class="input" placeholder="Observación (opcional)"></div></div></section>
+
+<section class="card overflow-hidden"><div class="card-head"><div><h2 class="card-title">2. Cochinos de la venta</h2><p class="card-sub">Solo se muestran los disponibles. El precio queda guardado como importe histórico.</p></div><span class="badge badge-blue">{{ filas|length }} disponibles</span></div>
+{% if filas %}<div class="overflow-x-auto"><table class="w-full min-w-[700px] text-left"><thead><tr class="border-b border-slate-100"><th class="th w-12"></th><th class="th">Cochino</th><th class="th">Raza / sexo</th><th class="th">Peso</th><th class="th w-52">Precio de venta <span class="text-rose-500">*</span></th></tr></thead><tbody class="divide-y divide-slate-50">{% for fila in filas %}<tr class="hover:bg-slate-50/70"><td class="td"><input type="checkbox" data-cochino-check class="h-4 w-4 rounded border-slate-300 text-brand-500 focus:ring-brand-500" name="cochinos" value="{{ fila.cochino.pk }}" data-pig="{{ fila.cochino.pk }}" {% if fila.seleccionado %}checked{% endif %} aria-label="Seleccionar {{ fila.cochino.codigo }}"></td><td class="td"><p class="font-semibold text-slate-900">{{ fila.cochino.codigo }}</p><p class="text-xs text-slate-400">{{ fila.cochino.nombre|default:"Sin nombre" }}</p></td><td class="td"><p>{{ fila.cochino.get_raza_display }}</p><p class="text-xs text-slate-400">{{ fila.cochino.get_sexo_display }}</p></td><td class="td whitespace-nowrap">{{ fila.cochino.peso_kg|floatformat:2 }} kg</td><td class="td"><label for="precio_{{ fila.cochino.pk }}" class="sr-only">Precio de {{ fila.cochino.codigo }}</label><input id="precio_{{ fila.cochino.pk }}" name="precio_{{ fila.cochino.pk }}" type="number" min="0.01" step="0.01" value="{{ fila.precio }}" data-price="{{ fila.cochino.pk }}" class="input py-2" placeholder="0.00"></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="px-6 py-12 text-center"><p class="font-semibold text-slate-700">No hay cochinos disponibles para vender</p><p class="mt-1 text-sm text-slate-400">Registra nuevos cochinos para poder generar una venta.</p><a href="{% url 'cochino_crear' %}" class="btn btn-primary mt-4">Registrar cochino</a></div>{% endif %}
+<div class="flex items-center justify-between border-t border-slate-100 bg-slate-50/70 px-6 py-4"><span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total estimado</span><span class="text-2xl font-semibold tracking-tight text-slate-900" id="total-estimado">0,00</span></div></section>
+
+<section class="card overflow-hidden"><div class="card-head"><div><h2 class="card-title">3. Datos del pago</h2><p class="card-sub">Quedan guardados junto con la venta</p></div></div>
+<div class="grid gap-5 p-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div><label for="metodo_pago" class="label">Método de pago <span class="text-rose-500">*</span></label><select id="metodo_pago" name="metodo_pago" required class="input">{% for valor, etiqueta in metodos_pago %}<option value="{{ valor }}" {% if valores.metodo_pago == valor %}selected{% endif %}>{{ etiqueta }}</option>{% endfor %}</select></div>
+    <div><label for="referencia_pago" class="label">Referencia del pago <span id="ref-obligatoria" class="text-rose-500">*</span></label><input id="referencia_pago" name="referencia_pago" maxlength="60" value="{{ valores.referencia_pago }}" class="input" placeholder="N.º de referencia u operación"><p class="hint" id="ref-ayuda">No es necesaria en pagos en efectivo.</p></div>
+    <div><label for="fecha_pago" class="label">Fecha del pago <span class="text-rose-500">*</span></label><input id="fecha_pago" name="fecha_pago" type="date" required value="{{ valores.fecha_pago }}" class="input"></div>
+    <div><label for="banco" class="label">Banco o entidad</label><input id="banco" name="banco" maxlength="80" value="{{ valores.banco }}" class="input" placeholder="Ej. Banesco, Mercantil..."></div>
+    <div><label for="monto_pagado" class="label">Monto pagado <span class="text-rose-500">*</span></label><input id="monto_pagado" name="monto_pagado" type="number" min="0.01" step="0.01" required value="{{ valores.monto_pagado }}" class="input" placeholder="0.00"><p class="hint">Si es menor al total, la venta queda con saldo pendiente.</p></div>
+    <div><label for="notas_pago" class="label">Observaciones del pago</label><input id="notas_pago" name="notas_pago" maxlength="255" value="{{ valores.notas_pago }}" class="input" placeholder="Opcional"></div>
+</div>
+<div class="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/70 px-6 py-4 sm:flex-row sm:justify-end"><a href="{% url 'ventas_lista' %}" class="btn btn-outline">Cancelar</a><button type="submit" {% if not hay_disponibles or not clientes %}disabled{% endif %} class="btn btn-primary disabled:cursor-not-allowed disabled:opacity-50">Confirmar venta</button></div></section>
+</form>
+{% endblock %}
+{% block scripts %}<script>
+(function () {
+    const formulario = document.getElementById("form-venta");
+    const salida = document.getElementById("total-estimado");
+    if (!formulario || !salida) return;
+    const monto = document.getElementById("monto_pagado");
+    const metodo = document.getElementById("metodo_pago");
+    const referencia = document.getElementById("referencia_pago");
+    const marca = document.getElementById("ref-obligatoria");
+    // Si el usuario ya escribió un monto, no se lo sobrescribimos.
+    let montoManual = monto.value !== "";
+    let totalActual = 0;
+
+    function actualizarTotal() {
+        let total = 0;
+        formulario.querySelectorAll("[data-cochino-check]:checked").forEach(function (casilla) {
+            const campo = formulario.querySelector('[data-price="' + casilla.dataset.pig + '"]');
+            const valor = Number.parseFloat(campo ? campo.value : "0");
+            if (Number.isFinite(valor) && valor > 0) total += valor;
+        });
+        totalActual = total;
+        salida.textContent = total.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (!montoManual) monto.value = total > 0 ? total.toFixed(2) : "";
+    }
+    function actualizarReferencia() {
+        const efectivo = metodo.value === "EFECTIVO";
+        referencia.required = !efectivo;
+        marca.classList.toggle("hidden", efectivo);
+    }
+    formulario.querySelectorAll("[data-cochino-check], [data-price]").forEach(function (campo) {
+        campo.addEventListener("change", actualizarTotal);
+        campo.addEventListener("input", actualizarTotal);
+    });
+    monto.addEventListener("input", function () { montoManual = monto.value !== ""; });
+    metodo.addEventListener("change", actualizarReferencia);
+    actualizarTotal();
+    actualizarReferencia();
+})();
+</script>{% endblock %}

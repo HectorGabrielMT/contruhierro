@@ -1,0 +1,43 @@
+{% extends "granja/base.html" %}
+{% load static %}
+{% block title %}Cochinos | Contru hierro{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+    <div><h1 class="page-title">Cochinos</h1><p class="page-sub">Inventario de animales, estado y genealogía.</p></div>
+    <a href="{% url 'cochino_crear' %}" class="btn btn-primary">{% include "granja/_icono.html" with n="plus" c="h-4 w-4" %} Registrar cochino</a>
+</div>
+<section class="card overflow-hidden">
+    <form method="get" class="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:p-5">
+        <input id="q" name="q" value="{{ q }}" placeholder="Código, nombre o raza" aria-label="Código, nombre o raza" class="input min-w-0 flex-1">
+        <select id="estado" name="estado" aria-label="Estado" class="input sm:w-56"><option value="">Todos los estados</option><option value="DISPONIBLE" {% if estado_filtro == 'DISPONIBLE' %}selected{% endif %}>Disponible</option><option value="VENDIDO" {% if estado_filtro == 'VENDIDO' %}selected{% endif %}>Vendido</option></select>
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        <a href="{% url 'cochinos_lista' %}" class="btn btn-outline">Limpiar</a>
+    </form>
+    <div class="overflow-x-auto"><table class="w-full min-w-[920px] text-left">
+        <thead><tr class="border-b border-slate-100"><th class="th">Cochino</th><th class="th">Raza / sexo</th><th class="th">Origen</th><th class="th">Peso</th><th class="th">Nacimiento</th><th class="th">Estado</th><th class="th text-right">Acciones</th></tr></thead>
+        <tbody class="divide-y divide-slate-50">
+        {% for cochino in cochinos %}
+        <tr class="hover:bg-slate-50/70">
+            <td class="td"><div class="flex items-center gap-3"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-pink-50"><img src="{% static 'granja/img/cochino-icon.svg' %}" alt="" class="h-8 w-8"></span><div class="min-w-0"><p class="font-semibold text-slate-900">{{ cochino.nombre|default:"Sin nombre" }}</p><p class="text-xs text-slate-400">{{ cochino.codigo }}</p></div></div></td>
+            <td class="td"><p class="text-slate-700">{{ cochino.get_raza_display }}</p><p class="text-xs text-slate-400">{{ cochino.get_sexo_display }}</p></td>
+            <td class="td"><p class="text-slate-700">{{ cochino.get_origen_display }}</p>{% if cochino.origen == 'CRIADO' %}<p class="text-xs text-slate-400">Madre: {% if cochino.madre %}{{ cochino.madre.codigo }}{% else %}—{% endif %} · Padre: {% if cochino.padre %}{{ cochino.padre.codigo }}{% else %}—{% endif %}</p>{% endif %}</td>
+            <td class="td whitespace-nowrap">{{ cochino.peso_kg|floatformat:2 }} kg</td>
+            <td class="td whitespace-nowrap">{% if cochino.fecha_nacimiento %}{{ cochino.fecha_nacimiento|date:"d/m/Y" }}{% else %}<span class="text-slate-300">—</span>{% endif %}</td>
+            <td class="td">{% if cochino.estado == 'DISPONIBLE' %}<span class="badge badge-green">Disponible</span>{% else %}<span class="badge badge-gray">Vendido</span>{% endif %}</td>
+            <td class="td">
+                {% if cochino.estado == 'DISPONIBLE' %}
+                <div class="flex items-center justify-end gap-2">
+                    <a href="{% url 'cochino_editar' cochino.pk %}" class="btn btn-outline px-3 py-2" title="Editar">{% include "granja/_icono.html" with n="edit" c="h-4 w-4" %}<span class="sr-only">Editar</span></a>
+                    <form method="post" action="{% url 'cochino_eliminar' cochino.pk %}" onsubmit="return confirm('¿Eliminar el registro {{ cochino.codigo }}?');">{% csrf_token %}<button type="submit" class="btn btn-danger px-3 py-2" title="Eliminar">{% include "granja/_icono.html" with n="trash" c="h-4 w-4" %}<span class="sr-only">Eliminar</span></button></form>
+                </div>
+                {% else %}<p class="flex items-center justify-end gap-1.5 text-xs text-slate-400">{% include "granja/_icono.html" with n="lock" c="h-3.5 w-3.5" %} Vendido</p>{% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="px-6 py-16 text-center"><img src="{% static 'granja/img/cochino-icon.svg' %}" alt="" class="mx-auto h-16 w-16"><p class="mt-4 font-semibold text-slate-700">No hay cochinos para mostrar</p><p class="mt-1 text-sm text-slate-400">Registra un cochino o cambia los filtros de búsqueda.</p><a href="{% url 'cochino_crear' %}" class="btn btn-primary mt-5">Registrar cochino</a></td></tr>
+        {% endfor %}
+        </tbody>
+    </table></div>
+    <div class="border-t border-slate-100 px-5 py-3 text-xs text-slate-400">Cochinos encontrados: <span class="font-semibold text-slate-600">{{ cochinos|length }}</span></div>
+</section>
+{% endblock %}

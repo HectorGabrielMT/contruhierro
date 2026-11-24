@@ -1,0 +1,133 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1b2f63">
+    <link rel="icon" type="image/svg+xml" href="{% static 'granja/img/cochino-icon.svg' %}">
+    <title>{% block title %}Contru hierro{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#eef3ff', 100: '#dbe6ff', 200: '#bcd0ff', 500: '#3d6ee8', 600: '#2f5bd1', 700: '#244ab0' },
+                        navy: { 800: '#1b2f63', 900: '#142350' },
+                    },
+                    boxShadow: { card: '0 1px 2px rgba(30,58,122,.05), 0 10px 28px -14px rgba(30,58,122,.18)' },
+                },
+            },
+        };
+    </script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .card { @apply rounded-2xl bg-white shadow-card ring-1 ring-slate-100; }
+            .card-head { @apply flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-6 py-4; }
+            .card-title { @apply text-sm font-semibold text-slate-800; }
+            .card-sub { @apply mt-0.5 text-xs text-slate-400; }
+            .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold uppercase tracking-wide transition focus:outline-none focus:ring-4; }
+            .btn-primary { @apply bg-brand-500 text-white hover:bg-brand-600 focus:ring-brand-100; }
+            .btn-outline { @apply border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 focus:ring-slate-100; }
+            .btn-danger { @apply border border-rose-200 bg-white text-rose-600 hover:bg-rose-50 focus:ring-rose-100; }
+            .input { @apply w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100; }
+            .input-err { @apply border-rose-400; }
+            .label { @apply mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-500; }
+            .err { @apply mt-1 text-xs text-rose-600; }
+            .hint { @apply mt-1 text-xs text-slate-400; }
+            .th { @apply px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-400; }
+            .td { @apply px-5 py-3.5 text-sm text-slate-600; }
+            .badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+            .badge-green { @apply bg-emerald-50 text-emerald-600; }
+            .badge-gray { @apply bg-slate-100 text-slate-500; }
+            .badge-amber { @apply bg-amber-50 text-amber-600; }
+            .badge-blue { @apply bg-brand-50 text-brand-600; }
+            .page-title { @apply text-2xl font-semibold tracking-tight text-slate-900; }
+            .page-sub { @apply mt-1 text-sm text-slate-400; }
+            .link { @apply font-semibold text-brand-600 hover:text-brand-700 hover:underline; }
+            .nav-link { @apply flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-blue-100/80 transition hover:bg-white/10 hover:text-white; }
+            .nav-active { @apply bg-white/15 text-white shadow-sm; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[#f1f4fa] font-sans text-sm text-slate-700 antialiased">
+{% if user.is_authenticated %}
+{% with url_actual=request.resolver_match.url_name %}
+<div class="min-h-screen">
+    <aside class="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col rounded-br-[2rem] bg-gradient-to-b from-navy-900 via-navy-800 to-brand-700 text-white lg:flex print:hidden">
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-6 py-7" aria-label="Ir al inicio">
+            <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/95 shadow-sm"><img src="{% static 'granja/img/cochino-icon.svg' %}" alt="" class="h-9 w-9"></span>
+            <span class="text-lg font-semibold tracking-tight">Contru hierro</span>
+        </a>
+        <nav class="flex-1 space-y-1 px-4 py-2" aria-label="Menú principal">
+            <a href="{% url 'dashboard' %}" class="nav-link {% if url_actual == 'dashboard' %}nav-active{% endif %}">{% include "granja/_icono.html" with n="home" %} Inicio</a>
+            <a href="{% url 'cochinos_lista' %}" class="nav-link {% if 'cochino' in url_actual %}nav-active{% endif %}"><img src="{% static 'granja/img/cochino-icon.svg' %}" alt="" class="h-5 w-5 rounded-md bg-white/90 p-px"> Cochinos</a>
+            <a href="{% url 'clientes_lista' %}" class="nav-link {% if 'cliente' in url_actual %}nav-active{% endif %}">{% include "granja/_icono.html" with n="users" %} Clientes</a>
+            <a href="{% url 'ventas_lista' %}" class="nav-link {% if 'venta' in url_actual %}nav-active{% endif %}">{% include "granja/_icono.html" with n="receipt" %} Ventas</a>
+            <a href="{% url 'reportes' %}" class="nav-link {% if url_actual == 'reportes' %}nav-active{% endif %}">{% include "granja/_icono.html" with n="chart" %} Reportes</a>
+            {% if user.is_staff %}
+            <div class="my-4 border-t border-white/10"></div>
+            <a href="{% url 'admin:index' %}" class="nav-link">{% include "granja/_icono.html" with n="sliders" %} Administración</a>
+            {% endif %}
+        </nav>
+        <form method="post" action="{% url 'logout' %}" class="p-4">
+            {% csrf_token %}
+            <button type="submit" class="nav-link w-full">{% include "granja/_icono.html" with n="logout" %} Cerrar sesión</button>
+        </form>
+    </aside>
+
+    <div class="min-h-screen lg:pl-64">
+        <header class="sticky top-0 z-20 flex items-center gap-4 bg-[#f1f4fa]/90 px-4 py-4 backdrop-blur sm:px-8 print:hidden">
+            <a href="{% url 'dashboard' %}" class="flex items-center gap-2 lg:hidden" aria-label="Inicio"><span class="flex h-10 w-10 items-center justify-center rounded-xl bg-navy-800"><img src="{% static 'granja/img/cochino-icon.svg' %}" alt="" class="h-8 w-8"></span></a>
+            <form method="get" action="{% url 'cochinos_lista' %}" class="relative max-w-xl flex-1" role="search">
+                <span class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-400">{% include "granja/_icono.html" with n="search" c="h-4 w-4" %}</span>
+                <input name="q" type="search" placeholder="Buscar cochino por código, nombre o raza" aria-label="Buscar cochino" class="w-full rounded-xl border-0 bg-white py-3 pl-11 pr-4 text-sm text-slate-700 shadow-card outline-none ring-1 ring-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-500">
+            </form>
+            <div class="ml-auto flex items-center gap-3">
+                <span class="hidden text-sm text-slate-500 sm:inline">Hola, <strong class="font-semibold text-slate-800">{{ user.get_full_name|default:user.username }}</strong></span>
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700" aria-hidden="true">{{ user.username|slice:":1"|upper }}</span>
+                <form method="post" action="{% url 'logout' %}" class="lg:hidden">{% csrf_token %}<button type="submit" class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-500 shadow-card ring-1 ring-slate-100" aria-label="Cerrar sesión">{% include "granja/_icono.html" with n="logout" c="h-4 w-4" %}</button></form>
+            </div>
+        </header>
+
+        <nav class="mx-4 mb-2 flex gap-1 overflow-x-auto rounded-xl bg-navy-800 p-1.5 sm:mx-8 lg:hidden print:hidden" aria-label="Navegación principal">
+            <a href="{% url 'dashboard' %}" class="whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold {% if url_actual == 'dashboard' %}bg-white text-navy-800{% else %}text-blue-100{% endif %}">Inicio</a>
+            <a href="{% url 'cochinos_lista' %}" class="whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold {% if 'cochino' in url_actual %}bg-white text-navy-800{% else %}text-blue-100{% endif %}">Cochinos</a>
+            <a href="{% url 'clientes_lista' %}" class="whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold {% if 'cliente' in url_actual %}bg-white text-navy-800{% else %}text-blue-100{% endif %}">Clientes</a>
+            <a href="{% url 'ventas_lista' %}" class="whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold {% if 'venta' in url_actual %}bg-white text-navy-800{% else %}text-blue-100{% endif %}">Ventas</a>
+            <a href="{% url 'reportes' %}" class="whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold {% if url_actual == 'reportes' %}bg-white text-navy-800{% else %}text-blue-100{% endif %}">Reportes</a>
+            {% if user.is_staff %}<a href="{% url 'admin:index' %}" class="whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold text-blue-100">Administración</a>{% endif %}
+        </nav>
+
+        <main class="mx-auto max-w-screen-2xl px-4 pb-12 pt-4 sm:px-8">
+            {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for message in messages %}
+                <div class="flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium {% if message.tags == 'error' %}border-rose-200 bg-rose-50 text-rose-700{% elif message.tags == 'success' %}border-emerald-200 bg-emerald-50 text-emerald-700{% else %}border-brand-200 bg-brand-50 text-brand-700{% endif %}" role="status">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+{% endwith %}
+{% else %}
+<main class="flex min-h-screen items-center justify-center bg-gradient-to-br from-navy-900 via-navy-800 to-brand-700 px-4 py-8 sm:px-8">
+    {% if messages %}
+    <div class="fixed left-4 right-4 top-4 z-50 mx-auto max-w-xl space-y-2">
+        {% for message in messages %}
+        <div class="rounded-xl border px-4 py-3 text-sm font-medium shadow-card {% if message.tags == 'error' %}border-rose-200 bg-rose-50 text-rose-700{% else %}border-emerald-200 bg-emerald-50 text-emerald-700{% endif %}" role="alert">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% block auth_content %}{% endblock %}
+</main>
+{% endif %}
+{% block scripts %}{% endblock %}
+</body>
+</html>
